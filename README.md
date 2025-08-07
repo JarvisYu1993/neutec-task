@@ -1,5 +1,5 @@
-# Vue 3 + Vite
+# 日新面試作業 余晉佳
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+vue 版本使用 ^3.5.17
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+vite 版本 ^7.0.4
