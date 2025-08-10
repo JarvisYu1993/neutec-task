@@ -1,48 +1,55 @@
 <template>
   <div class="container">
-    <!-- 動態格子 -->
     <div
         class="grid"
         :style="{
         gridTemplateColumns: `repeat(${size}, 1fr)`,
-        gridAutoRows: `calc(min(100vw, 100vh) / ${size})`
+        gridTemplateRows: `repeat(${size}, 1fr)`
       }"
     >
-      <div v-for="index in totalCells" :key="index" class="cell">
+      <div
+          v-for="index in totalCells"
+          :key="`${index}-${refreshKey}`"
+          class="cell"
+      >
         <svg class="square" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
-          <!-- 邊框 -->
           <path
               d="M15 5 H85 Q95 5 95 15 V85 Q95 95 85 95 H15 Q5 95 5 85 V15 Q5 5 15 5 Z"
               class="track"
           />
-          <!-- 第一條線 -->
           <path
               v-show="isActive(index)"
               class="runner runner1"
               d="M15 5 H85 Q95 5 95 15 V85 Q95 95 85 95 H15 Q5 95 5 85 V15 Q5 5 15 5 Z"
+              pathLength="318"
           />
-          <!-- 第二條線 -->
           <path
               v-show="isActive(index)"
               class="runner runner2"
               d="M15 5 H85 Q95 5 95 15 V85 Q95 95 85 95 H15 Q5 95 5 85 V15 Q5 5 15 5 Z"
+              pathLength="318"
           />
         </svg>
       </div>
     </div>
-    <!-- 控制區 -->
+
     <div class="controls">
       <div class="controls-btn">
-        <button v-for="n in [1, 3, 5, 10]" :key="n" @click="setSize(n)">
+        <button
+            v-for="n in [1, 3, 5, 10]"
+            :key="n"
+            :class="{ active: size === n }"
+            @click="setSize(n)"
+        >
           {{ n }}x{{ n }}
         </button>
       </div>
       <div class="controls-radio">
         <label>
-          <input type="radio" value="all" v-model="mode" /> All
+          <input type="radio" value="all" v-model="mode"/> All
         </label>
         <label>
-          <input type="radio" value="random" v-model="mode" /> Random
+          <input type="radio" value="random" v-model="mode"/> Random
         </label>
       </div>
     </div>
@@ -50,65 +57,84 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 
-const size = ref(3);
+const size = ref(1);
 const mode = ref("all");
+const randomActiveSet = ref(new Set());
+const refreshKey = ref(0);
 
 const totalCells = computed(() => size.value * size.value);
 
+const generateRandomActive = () => {
+  const total = totalCells.value;
+  const count = Math.max(1, Math.floor(total * 0.6));
+  const newSet = new Set();
+
+  while (newSet.size < count) {
+    const randomIndex = Math.floor(Math.random() * total) + 1;
+    newSet.add(randomIndex);
+  }
+
+  randomActiveSet.value = newSet;
+};
+
 const isActive = (index) => {
   if (mode.value === "all") return true;
-  return index % 2 === 0;
+  return randomActiveSet.value.has(index);
 };
 
 const setSize = (n) => {
   size.value = n;
+  refreshKey.value++; // 重新渲染動畫
 };
+
+watch(mode, (newMode) => {
+  if (newMode === "random") {
+    generateRandomActive();
+  }
+  refreshKey.value++; // 模式切換時重新開始動畫
+});
+
+watch(totalCells, () => {
+  if (mode.value === "random") {
+    generateRandomActive();
+  }
+});
 </script>
 
 <style>
 body {
   margin: 0;
   background: black;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
+
 .container {
   display: flex;
   flex-direction: column;
   align-items: center;
   color: white;
-  height: 100%;
+  height: 100vh;
   width: 100vw;
-  padding: 10px;
+  padding: 20px;
   box-sizing: border-box;
-}
-
-.controls {
-  width: 100%;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-}
-.controls-btn {
-  display: flex;
-  gap: 4px;
-}
-
-.controls-radio {
-  display: flex;
-  padding: 10px 0;
 }
 
 .grid {
   display: grid;
-  flex: 1;
-  width: 100%;
-  height: 100%;
-  gap: 0;
+  width: min(80vw, 80vh);
+  height: min(80vw, 80vh);
+  gap: 2px;
+  margin: 20px 0;
 }
 
 .cell {
   width: 100%;
+  height: 100%;
+  background: #111;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .square {
@@ -118,54 +144,128 @@ body {
 
 .track {
   fill: none;
-  stroke: #555;
-  stroke-width: 2;
+  stroke: #333;
+  stroke-width: 1.5;
 }
 
 .runner {
   fill: none;
-  stroke: white;
-  stroke-width: 2;
+  stroke: #ffffff;
+  stroke-width: 1.5;
   stroke-linecap: round;
-  stroke-dasharray: 20 380;
-  stroke-dashoffset: -100;
-  animation: chase 2s linear infinite;
-  /* 全部格子共用同一條動畫 */
+  stroke-dasharray: 18 300;
+  opacity: 0.8;
+}
+
+.runner1 {
+  animation: chase 2.5s ease-in-out infinite;
+  animation-delay: 0s;
 }
 
 .runner2 {
-  animation-delay: 1s; /* 第二條延遲半圈 */
+  animation: chase 2.5s ease-in-out infinite;
+  animation-delay: 1.25s;
+  stroke: #ffffff;
 }
 
 @keyframes chase {
   0% {
-    stroke-dashoffset: -100;
+    stroke-dashoffset: 0;
+    opacity: 1;
+    animation-timing-function: ease-out;
+  }
+  24% {
+    stroke-dashoffset: -75;
+    opacity: 1;
     animation-timing-function: ease-in;
   }
   25% {
-    stroke-dashoffset: -200;
-    animation-timing-function: linear;
+    stroke-dashoffset: -79;
+    opacity: 1;
+    animation-timing-function: ease-out;
   }
-  26% {
+  49% {
+    stroke-dashoffset: -154;
+    opacity: 1;
     animation-timing-function: ease-in;
   }
   50% {
-    stroke-dashoffset: -300;
-    animation-timing-function: linear;
+    stroke-dashoffset: -158;
+    opacity: 1;
+    animation-timing-function: ease-out;
   }
-  51% {
+  74% {
+    stroke-dashoffset: -233;
+    opacity: 1;
     animation-timing-function: ease-in;
   }
   75% {
-    stroke-dashoffset: -400;
-    animation-timing-function: linear;
+    stroke-dashoffset: -237;
+    opacity: 1;
+    animation-timing-function: ease-out;
   }
-  76% {
+  99% {
+    stroke-dashoffset: -312;
+    opacity: 1;
     animation-timing-function: ease-in;
   }
   100% {
-    stroke-dashoffset: -500;
-    animation-timing-function: linear;
+    stroke-dashoffset: -318;
+    opacity: 1;
   }
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.controls-btn {
+  display: flex;
+  gap: 8px;
+}
+
+.controls-btn button {
+  padding: 8px 16px;
+  background: #333;
+  color: white;
+  border: 1px solid #555;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.controls-btn button.active {
+  background: #0066cc;
+  border-color: #0088ff;
+}
+
+.controls-btn button:hover {
+  background: #444;
+}
+
+.controls-btn button.active:hover {
+  background: #0077dd;
+}
+
+.controls-radio {
+  display: flex;
+  gap: 20px;
+}
+
+.controls-radio label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.controls-radio input[type="radio"] {
+  width: 16px;
+  height: 16px;
 }
 </style>
