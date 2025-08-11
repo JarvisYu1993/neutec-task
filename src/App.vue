@@ -13,26 +13,51 @@
           class="cell"
       >
         <svg class="square" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+          <!-- 矩形輪廓 -->
           <path
+              v-show="shape === 'rectangle'"
               d="M15 5 H85 Q95 5 95 15 V85 Q95 95 85 95 H15 Q5 95 5 85 V15 Q5 5 15 5 Z"
               class="track"
           />
+          <!-- 尖底愛心輪廓 -->
           <path
-              v-show="isActive(index)"
-              class="runner runner1"
+              v-show="shape === 'heart'"
+              d="M50,30 C50,15 30,5 20,20 C10,35 25,55 50,70 C75,55 90,35 80,20 C70,5 50,15 50,30 Z"
+              class="track"
+          />
+
+          <!-- 矩形動畫 -->
+          <path
+              v-show="isActive(index) && shape === 'rectangle'"
+              class="runner runner1 rectangle"
               d="M15 5 H85 Q95 5 95 15 V85 Q95 95 85 95 H15 Q5 95 5 85 V15 Q5 5 15 5 Z"
               pathLength="318"
           />
           <path
-              v-show="isActive(index)"
-              class="runner runner2"
+              v-show="isActive(index) && shape === 'rectangle'"
+              class="runner runner2 rectangle"
               d="M15 5 H85 Q95 5 95 15 V85 Q95 95 85 95 H15 Q5 95 5 85 V15 Q5 5 15 5 Z"
               pathLength="318"
+          />
+
+          <!-- 愛心動畫 -->
+          <path
+              v-show="isActive(index) && shape === 'heart'"
+              class="runner runner1 heart"
+              d="M50,30 C50,15 30,5 20,20 C10,35 25,55 50,70 C75,55 90,35 80,20 C70,5 50,15 50,30 Z"
+              pathLength="220"
+          />
+          <path
+              v-show="isActive(index) && shape === 'heart'"
+              class="runner runner2 heart"
+              d="M50,30 C50,15 30,5 20,20 C10,35 25,55 50,70 C75,55 90,35 80,20 C70,5 50,15 50,30 Z"
+              pathLength="220"
           />
         </svg>
       </div>
     </div>
 
+    <!-- 控制區 -->
     <div class="controls">
       <div class="controls-btn">
         <button
@@ -52,6 +77,14 @@
           <input type="radio" value="random" v-model="mode"/> Random
         </label>
       </div>
+      <div class="controls-shape">
+        <label>
+          <input type="radio" value="rectangle" v-model="shape"/> Rectangle
+        </label>
+        <label>
+          <input type="radio" value="heart" v-model="shape"/> Heart
+        </label>
+      </div>
     </div>
   </div>
 </template>
@@ -61,6 +94,7 @@ import { ref, computed, watch } from "vue";
 
 const size = ref(1);
 const mode = ref("all");
+const shape = ref("rectangle");
 const randomActiveSet = ref(new Set());
 const refreshKey = ref(0);
 
@@ -86,14 +120,18 @@ const isActive = (index) => {
 
 const setSize = (n) => {
   size.value = n;
-  refreshKey.value++; // 重新渲染動畫
+  refreshKey.value++;
 };
 
 watch(mode, (newMode) => {
   if (newMode === "random") {
     generateRandomActive();
   }
-  refreshKey.value++; // 模式切換時重新開始動畫
+  refreshKey.value++;
+});
+
+watch(shape, () => {
+  refreshKey.value++;
 });
 
 watch(totalCells, () => {
@@ -101,6 +139,8 @@ watch(totalCells, () => {
     generateRandomActive();
   }
 });
+
+generateRandomActive();
 </script>
 
 <style>
@@ -153,66 +193,61 @@ body {
   stroke: #ffffff;
   stroke-width: 1.5;
   stroke-linecap: round;
-  stroke-dasharray: 18 300;
   opacity: 0.8;
 }
 
-.runner1 {
-  animation: chase 2.5s ease-in-out infinite;
+/* 矩形動畫 */
+.runner.rectangle {
+  stroke-dasharray: 18 300;
+}
+
+.runner1.rectangle {
+  animation: chase-rectangle 2.5s ease-in-out infinite;
   animation-delay: 0s;
 }
 
-.runner2 {
-  animation: chase 2.5s ease-in-out infinite;
+.runner2.rectangle {
+  animation: chase-rectangle 2.5s ease-in-out infinite;
   animation-delay: 1.25s;
-  stroke: #ffffff;
 }
 
-@keyframes chase {
-  0% {
-    stroke-dashoffset: 0;
-    opacity: 1;
-    animation-timing-function: ease-out;
-  }
-  24% {
-    stroke-dashoffset: -75;
-    opacity: 1;
-    animation-timing-function: ease-in;
-  }
-  25% {
-    stroke-dashoffset: -79;
-    opacity: 1;
-    animation-timing-function: ease-out;
-  }
-  49% {
-    stroke-dashoffset: -154;
-    opacity: 1;
-    animation-timing-function: ease-in;
-  }
-  50% {
-    stroke-dashoffset: -158;
-    opacity: 1;
-    animation-timing-function: ease-out;
-  }
-  74% {
-    stroke-dashoffset: -233;
-    opacity: 1;
-    animation-timing-function: ease-in;
-  }
-  75% {
-    stroke-dashoffset: -237;
-    opacity: 1;
-    animation-timing-function: ease-out;
-  }
-  99% {
-    stroke-dashoffset: -312;
-    opacity: 1;
-    animation-timing-function: ease-in;
-  }
-  100% {
-    stroke-dashoffset: -318;
-    opacity: 1;
-  }
+/* 尖底愛心動畫 */
+.runner.heart {
+  stroke-dasharray: 14 206; /* 總長 220，光條 14 */
+}
+
+.runner1.heart {
+  animation: chase-heart 2.8s infinite;
+  animation-delay: 0s;
+}
+
+.runner2.heart {
+  animation: chase-heart 2.8s infinite;
+  animation-delay: 1.4s;
+}
+
+/* 矩形追逐 */
+@keyframes chase-rectangle {
+  0% { stroke-dashoffset: 0; animation-timing-function: ease-out; }
+  24% { stroke-dashoffset: -75; animation-timing-function: ease-in; }
+  25% { stroke-dashoffset: -79; animation-timing-function: ease-out; }
+  49% { stroke-dashoffset: -154; animation-timing-function: ease-in; }
+  50% { stroke-dashoffset: -158; animation-timing-function: ease-out; }
+  74% { stroke-dashoffset: -233; animation-timing-function: ease-in; }
+  75% { stroke-dashoffset: -237; animation-timing-function: ease-out; }
+  99% { stroke-dashoffset: -312; animation-timing-function: ease-in; }
+  100% { stroke-dashoffset: -318; }
+}
+
+/* 愛心追逐（尖角加速效果） */
+@keyframes chase-heart {
+  0%   { stroke-dashoffset: 0;   opacity: 1; animation-timing-function: ease-out; }
+  15%  { stroke-dashoffset: -37; opacity: 1; animation-timing-function: ease-in-out; }
+  30%  { stroke-dashoffset: -74; opacity: 1; animation-timing-function: ease-in; }
+  50%  { stroke-dashoffset: -120;opacity: 1; animation-timing-function: ease-out; } /* 左心尖 */
+  65%  { stroke-dashoffset: -157;opacity: 1; animation-timing-function: ease-in-out; }
+  80%  { stroke-dashoffset: -203;opacity: 1; animation-timing-function: ease-in; } /* 右心尖 */
+  100% { stroke-dashoffset: -240;opacity: 1; }
 }
 
 .controls {
@@ -256,7 +291,13 @@ body {
   gap: 20px;
 }
 
-.controls-radio label {
+.controls-shape {
+  display: flex;
+  gap: 20px;
+}
+
+.controls-radio label,
+.controls-shape label {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -264,7 +305,8 @@ body {
   font-size: 14px;
 }
 
-.controls-radio input[type="radio"] {
+.controls-radio input[type="radio"],
+.controls-shape input[type="radio"] {
   width: 16px;
   height: 16px;
 }
