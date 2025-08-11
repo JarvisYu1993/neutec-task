@@ -13,20 +13,12 @@
           class="cell"
       >
         <svg class="square" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
-          <!-- 矩形輪廓 -->
+          <!-- 矩形 -->
           <path
               v-show="shape === 'rectangle'"
               d="M15 5 H85 Q95 5 95 15 V85 Q95 95 85 95 H15 Q5 95 5 85 V15 Q5 5 15 5 Z"
               class="track"
           />
-          <!-- 尖底愛心輪廓 -->
-          <path
-              v-show="shape === 'heart'"
-              d="M50,30 C50,15 30,5 20,20 C10,35 25,55 50,70 C75,55 90,35 80,20 C70,5 50,15 50,30 Z"
-              class="track"
-          />
-
-          <!-- 矩形動畫 -->
           <path
               v-show="isActive(index) && shape === 'rectangle'"
               class="runner runner1 rectangle"
@@ -39,8 +31,12 @@
               d="M15 5 H85 Q95 5 95 15 V85 Q95 95 85 95 H15 Q5 95 5 85 V15 Q5 5 15 5 Z"
               pathLength="318"
           />
-
-          <!-- 愛心動畫 -->
+          <!-- 愛心 -->
+          <path
+              v-show="shape === 'heart'"
+              d="M50,30 C50,15 30,5 20,20 C10,35 25,55 50,70 C75,55 90,35 80,20 C70,5 50,15 50,30 Z"
+              class="track"
+          />
           <path
               v-show="isActive(index) && shape === 'heart'"
               class="runner runner1 heart"
@@ -150,6 +146,7 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+
 .container {
   display: flex;
   flex-direction: column;
@@ -161,6 +158,7 @@ body {
   box-sizing: border-box;
 }
 
+
 .grid {
   display: grid;
   width: min(80vw, 80vh);
@@ -168,6 +166,7 @@ body {
   gap: 2px;
   margin: 20px 0;
 }
+
 
 .cell {
   width: 100%;
@@ -177,16 +176,19 @@ body {
   overflow: hidden;
 }
 
+
 .square {
   width: 100%;
   height: 100%;
 }
+
 
 .track {
   fill: none;
   stroke: #333;
   stroke-width: 1.5;
 }
+
 
 .runner {
   fill: none;
@@ -196,37 +198,41 @@ body {
   opacity: 0.8;
 }
 
-/* 矩形動畫 */
+
 .runner.rectangle {
   stroke-dasharray: 18 300;
 }
+
 
 .runner1.rectangle {
   animation: chase-rectangle 2.5s ease-in-out infinite;
   animation-delay: 0s;
 }
 
+
 .runner2.rectangle {
   animation: chase-rectangle 2.5s ease-in-out infinite;
   animation-delay: 1.25s;
 }
 
-/* 尖底愛心動畫 */
+
 .runner.heart {
-  stroke-dasharray: 14 206; /* 總長 220，光條 14 */
+  stroke-dasharray: 14 206;
 }
+
 
 .runner1.heart {
   animation: chase-heart 2.8s infinite;
   animation-delay: 0s;
 }
 
+
 .runner2.heart {
   animation: chase-heart 2.8s infinite;
   animation-delay: 1.4s;
 }
 
-/* 矩形追逐 */
+
 @keyframes chase-rectangle {
   0% { stroke-dashoffset: 0; animation-timing-function: ease-out; }
   24% { stroke-dashoffset: -75; animation-timing-function: ease-in; }
@@ -239,16 +245,15 @@ body {
   100% { stroke-dashoffset: -318; }
 }
 
-/* 愛心追逐（尖角加速效果） */
+
 @keyframes chase-heart {
-  0%   { stroke-dashoffset: 0;   opacity: 1; animation-timing-function: ease-out; }
-  15%  { stroke-dashoffset: -37; opacity: 1; animation-timing-function: ease-in-out; }
-  30%  { stroke-dashoffset: -74; opacity: 1; animation-timing-function: ease-in; }
-  50%  { stroke-dashoffset: -120;opacity: 1; animation-timing-function: ease-out; } /* 左心尖 */
-  65%  { stroke-dashoffset: -157;opacity: 1; animation-timing-function: ease-in-out; }
-  80%  { stroke-dashoffset: -203;opacity: 1; animation-timing-function: ease-in; } /* 右心尖 */
-  100% { stroke-dashoffset: -240;opacity: 1; }
+  0%   { stroke-dashoffset: 0;   opacity: 1; animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1); }
+  25%  { stroke-dashoffset: -55; opacity: 1; animation-timing-function: ease-out; }
+  50%  { stroke-dashoffset: -110; opacity: 1; animation-timing-function: ease-in-out; } /* 底部尖角 */
+  75%  { stroke-dashoffset: -165; opacity: 1; animation-timing-function: ease-out; }
+  100% { stroke-dashoffset: -220; opacity: 1; animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1); }
 }
+
 
 .controls {
   display: flex;
@@ -257,10 +262,12 @@ body {
   gap: 15px;
 }
 
+
 .controls-btn {
   display: flex;
   gap: 8px;
 }
+
 
 .controls-btn button {
   padding: 8px 16px;
@@ -273,28 +280,34 @@ body {
   transition: all 0.2s;
 }
 
+
 .controls-btn button.active {
   background: #0066cc;
   border-color: #0088ff;
 }
 
+
 .controls-btn button:hover {
   background: #444;
 }
 
+
 .controls-btn button.active:hover {
   background: #0077dd;
 }
+
 
 .controls-radio {
   display: flex;
   gap: 20px;
 }
 
+
 .controls-shape {
   display: flex;
   gap: 20px;
 }
+
 
 .controls-radio label,
 .controls-shape label {
@@ -305,8 +318,9 @@ body {
   font-size: 14px;
 }
 
-.controls-radio input[type="radio"],
-.controls-shape input[type="radio"] {
+
+.controls-radio input [type="radio"],
+.controls-shape input [type="radio"] {
   width: 16px;
   height: 16px;
 }
